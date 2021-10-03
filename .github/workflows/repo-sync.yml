@@ -1,29 +1,26 @@
-# File: .github/workflows/repo-sync.yml
-name: sync-sazs34-scripts
-on:
-  schedule:
-    - cron: '5 0,7,15 * * *'
-  workflow_dispatch:
-  watch:
-    types: started
-  repository_dispatch:
-    types: sync-sazs34-scripts
-jobs:
-  repo-sync:
-    env:
-      PAT: ${{ secrets.PAT || github.event.client_payload.PAT }} #此处PAT需要申请，教程详见：https://www.jianshu.com/p/bb82b3ad1d11
-    runs-on: ubuntu-latest
-    if: github.event.repository.owner.id == github.event.sender.id
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
+name: Github JD-sign bot
 
-      - name: sync sazs34-scripts
-        uses: repo-sync/github-sync@v2
-        if: env.PAT
-        with:
-          source_repo: "https://github.com/sazs34/MyActions.git"
-          source_branch: "master"
-          destination_branch: "main"
-          github_token: ${{ secrets.PAT || github.event.client_payload.PAT }}
+on:
+    push:
+        branches:
+            - master
+    schedule:
+        - cron: '5 16 * * *'
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout codes
+              uses: actions/checkout@v2
+            - name: Use Node.js
+              uses: actions/setup-node@v1
+              with:
+                node-version: '12.x'
+            - name: Run app
+              run: npm install
+            - run: node app.js
+              env:
+                JD_COOKIE: ${{ secrets.JD_COOKIE }}
+                JD_COOKIE_2: ${{ secrets.JD_COOKIE_2 }} 
+                PUSH_KEY: ${{ secrets.PUSH_KEY }}
